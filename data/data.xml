@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data noupdate="0">
+        <record model="ir.sequence.type" id="bc_sequence">
+            <field name="name">Codigo secuencia BC</field>
+            <field name="code">business.case</field>
+        </record>
+        
+        <record model="ir.sequence" id="bc_cr_sequence">
+            <field name="name">Secuencia de Business Case CR</field>
+            <field name="code">business.case</field>
+            <field name="active">TRUE</field>
+            <field name="prefix">CR</field>
+            <field name="number_increment">1</field>
+            <field name="number_next">1</field>
+            <field name="implementation">no_gap</field>
+            <field name="company_id">3</field>
+        </record>
+        
+         <record model="ir.sequence" id="bc_es_sequence">
+            <field name="name">Secuencia de Business Case ES</field>
+            <field name="code">business.case</field>
+            <field name="active">TRUE</field>
+            <field name="prefix">ES</field>
+            <field name="number_increment">1</field>
+            <field name="number_next">1</field>
+            <field name="implementation">no_gap</field>
+            <field name="company_id">9</field>
+        </record>
+        
+         <record model="ir.sequence" id="bc_gu_sequence">
+            <field name="name">Secuencia de Business Case GU</field>
+            <field name="code">business.case</field>
+            <field name="active">TRUE</field>
+            <field name="prefix">GU</field>
+            <field name="number_increment">1</field>
+            <field name="number_next">1</field>
+            <field name="implementation">no_gap</field>
+            <field name="company_id">12</field>
+        </record>
+        
+         <record model="ir.sequence" id="bc_ho_sequence">
+            <field name="name">Secuencia de Business Case HO</field>
+            <field name="code">business.case</field>
+            <field name="active">TRUE</field>
+            <field name="prefix">HO</field>
+            <field name="number_increment">1</field>
+            <field name="number_next">1</field>
+            <field name="implementation">no_gap</field>
+            <field name="company_id">11</field>
+        </record>
+        
+         <record model="ir.sequence" id="bc_ni_sequence">
+            <field name="name">Secuencia de Business Case NI</field>
+            <field name="code">business.case</field>
+            <field name="active">TRUE</field>
+            <field name="prefix">NI</field>
+            <field name="number_increment">1</field>
+            <field name="number_next">1</field>
+            <field name="implementation">no_gap</field>
+            <field name="company_id">7</field>
+        </record>
+        
+         <record model="ir.sequence" id="bc_pa_sequence">
+            <field name="name">Secuencia de Business Case PA</field>
+            <field name="code">business.case</field>
+            <field name="active">TRUE</field>
+            <field name="prefix">PA</field>
+            <field name="number_increment">1</field>
+            <field name="number_next">1</field>
+            <field name="implementation">no_gap</field>
+            <field name="company_id">8</field>
+        </record>
+
+	<!-- Mantenimientos del Business Case -->
+	
+	<!-- Indicadores -->
+	<record model="bc.indicadores" id="bc_indicadores_1">
+            <field name="name">Margen de Operación</field>
+    </record>
+	<record model="bc.indicadores" id="bc_indicadores_2">
+		<field name="name">Porcentaje de Contribución</field>
+	</record>
+	<record model="bc.indicadores" id="bc_indicadores_3">
+	    <field name="name">Contribución por FTE</field>
+	</record>
+	
+	<!-- Areas Especialidad -->
+	<record model="bc.indicadores" id="bc_area_1">
+            <field name="name">Implementación</field>
+    </record>
+    <record model="bc.indicadores" id="bc_area_2">
+            <field name="name">Mantenimiento</field>
+    </record>
+    <record model="bc.indicadores" id="bc_area_3">
+            <field name="name">Infraestructura</field>
+    </record>
+    <record model="bc.indicadores" id="bc_area_4">
+            <field name="name">NOC</field>
+    </record>
+	
+	<!-- CDO  -->
+	<record model="bc.cdo" id="bc_cdo_1">
+            <field name="name">Salarios</field>
+    </record>
+    <record model="bc.cdo" id="bc_cdo_2">
+            <field name="name">Cargas Sociales</field>
+    </record>
+    <record model="bc.cdo" id="bc_cdo_3">
+            <field name="name">Costo de Viáticos</field>
+    </record>
+    <record model="bc.cdo" id="bc_cdo_4">
+            <field name="name">Materiales Adicionales</field>
+    </record>
+    
+    <!-- Paises  -->
+	<record model="bc.paises" id="bc_paises_1">
+            <field name="name">Costa Rica</field>
+    </record>
+    <record model="bc.paises" id="bc_paises_2">
+            <field name="name">Guatemala</field>
+    </record>
+    <record model="bc.paises" id="bc_paises_3">
+            <field name="name">El Salvador</field>
+    </record>
+    <record model="bc.paises" id="bc_paises_4">
+            <field name="name">Nicaragua</field>
+    </record>
+    <record model="bc.paises" id="bc_paises_5">
+            <field name="name">Honduras</field>
+    </record>
+    <record model="bc.paises" id="bc_paises_6">
+            <field name="name">República Dominicana</field>
+    </record>
+    <record model="bc.paises" id="bc_paises_7">
+            <field name="name">Colombia</field>
+    </record>
+    <record model="bc.paises" id="bc_paises_8">
+            <field name="name">Puerto Rico</field>
+    </record>
+    
+    <!-- Aprovaciones Departamento  -->
+	<record model="bc.aprobaciones.departamento" id="bc_aprobaciones_departamento_1">
+            <field name="name">Por Negocios</field>
+    </record>
+    <record model="bc.aprobaciones.departamento" id="bc_aprobaciones_departamento_2">
+            <field name="name">Por Preventa</field>
+    </record>
+    <record model="bc.aprobaciones.departamento" id="bc_aprobaciones_departamento_3">
+            <field name="name">Por PMO / SMO</field>
+    </record>
+    <record model="bc.aprobaciones.departamento" id="bc_aprobaciones_departamento_4">
+            <field name="name">Por Operaciones</field>
+    </record>
+    <record model="bc.aprobaciones.departamento" id="bc_aprobaciones_departamento_5">
+            <field name="name">Por Financiero</field>
+    </record>
+    
+    <!-- Modo de contratacion  -->
+	<record model="bc.modo.contratacion" id="bc_modo_contratacion_1">
+            <field name="name">Planilla</field>
+    </record>
+    <record model="bc.modo.contratacion" id="bc_modo_contratacion_2">
+            <field name="name">Servicios Profesionales</field>
+    </record>
+    
+    <!-- Ubicacion fisica  -->
+	<record model="bc.ubicacion.fisica" id="bc_ubicacion_fisica_1">
+            <field name="name">Externo</field>
+    </record>
+    <record model="bc.ubicacion.fisica" id="bc_ubicacion_fisica_2">
+            <field name="name">Multipark</field>
+    </record>
+     <record model="bc.ubicacion.fisica" id="bc_ubicacion_fisica_3">
+            <field name="name">Sabana</field>
+    </record>
+	
+	<!-- Bom Categorias  -->
+	<record model="bc.bom.categorias" id="bc_bom_categoria_1">
+            <field name="name">Equipos</field>
+    </record>
+    <record model="bc.bom.categorias" id="bc_bom_categoria_2">
+            <field name="name">Smartnet/SS</field>
+    </record>
+    <record model="bc.bom.categorias" id="bc_bom_categoria_3">
+            <field name="name">Servicios del Fabricante</field>
+    </record>
+    <record model="bc.bom.categorias" id="bc_bom_categoria_4">
+            <field name="name">Servicios Implementacion SPC</field>
+    </record>
+    <record model="bc.bom.categorias" id="bc_bom_categoria_5">
+            <field name="name">Servicios Mtto SPC</field>
+    </record>
+    <record model="bc.bom.categorias" id="bc_bom_categoria_6">
+            <field name="name">Servicios Cisco</field>
+    </record>
+    <record model="bc.bom.categorias" id="bc_bom_categoria_7">
+            <field name="name">Infraestructura</field>
+    </record>
+    <record model="bc.bom.categorias" id="bc_bom_categoria_8">
+            <field name="name">Capacitacion</field>
+    </record>
+    <record model="bc.bom.categorias" id="bc_bom_categoria_9">
+            <field name="name">Costo Financiero</field>
+    </record>
+    <record model="bc.bom.categorias" id="bc_bom_categoria_10">
+            <field name="name">Eventos</field>
+    </record>
+    <record model="bc.bom.categorias" id="bc_bom_categoria_11">
+            <field name="name">Imprevistos</field>
+    </record>
+    <record model="bc.bom.categorias" id="bc_bom_categoria_12">
+            <field name="name">Otros</field>
+    </record>
+	
+    </data>
+</openerp>

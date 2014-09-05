@@ -1,0 +1,986 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>        
+
+	<record id="view_bc_sale_order" model="ir.ui.view">
+        <field name="name">bc_sale_order</field>
+        <field name="model">sale.order</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+		      <xpath expr="//button[@name='copy_quotation']" position="replace">
+		      	<button name="copy_quotation" string="New Copy of Quotation" type="object" invisible="1"/>
+		      </xpath>
+        </field>
+    </record>
+
+    <record id="view_business_case_tree" model="ir.ui.view">
+        <field name="name">business_case_tree</field>
+        <field name="model">business.case</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+	    <tree string="Bussiness case" version="7.0">
+		<field name="name"/>
+		<field name="number"/>
+		<field name="version"/>
+		<field name="state"/>
+		<field name="oportunidad_id"/>
+		<field name="date"/>
+	    </tree>           
+        </field>
+    </record>
+
+
+    <record id="view_business_case_form" model="ir.ui.view">
+        <field name="name">business_case_form</field>
+        <field name="model">business.case</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Bussiness case" version="7.0">
+			<header>
+				<button name="todos_los_botones" string="Actualizar" class="oe_highlight" type="object" attrs="{'invisible':[('state','=','done')]}" context="{'ingreso_implementacion':ingreso_implementacion, 'ingreso_mantenimientos':ingreso_mantenimientos, 'ingreso_noc':ingreso_noc, 'ingreso_infraestructura':ingreso_infraestructura, 'margen_contribucion_id': margen_contribucion_id, 'ingreso_p':ingreso_propuesto_superior_id}"/>
+				<button name="boton_validar_bc" string="Validar" type="object" states='draft' context="{'oportunidad_id':oportunidad_id,'version':version,'bom_equipo_id':bom_equipo_id}" class="oe_highlight"/>
+				<button name="boton_cancelar_bc" string="Cancelar" type="object" context="{'oportunidad_id': oportunidad_id}" attrs="{'invisible':[('pedido_venta_validado','not in',('draft','cancel'))]}"/>
+				<button name="boton_copia_bc" string="Generar Copia" type="object" states='cancel' context="{'version': version}" class="oe_highlight"/>
+				<button name="boton_proyecto_bc" string="Generar Proyecto" groups="dis_BusinessCase.group_bc_sale,dis_BusinessCase.group_bc_sale_presale" type="object" attrs="{'invisible':['|',('pedido_venta','=',False),('state','!=','sale')]}" class="oe_highlight"/>
+				<button name="boton_venta_bc" string="Generar Cotización" groups="dis_BusinessCase.group_bc_sale,dis_BusinessCase.group_bc_sale_presale" type="object" attrs="{'invisible':['|',('pedido_venta','!=',False),('state','!=','sale')]}" context="{'partner_id': cliente_id,'pedido_venta':pedido_venta, 'ingreso_implementacion': ingreso_implementacion,'ingreso_mantenimientos':ingreso_mantenimientos, 'ingreso_noc':ingreso_noc, 'ingreso_infraestructura': ingreso_infraestructura, 'user_id': user_id, 'oportunidad_id':oportunidad_id}" class="oe_highlight"/>
+				<field name="state" widget="statusbar" statusbar_visible="draft,sale,done" statusbar_colors='{"draft":"blue","sale":"blue","done":"blue","cancel":"blue"}' nolabel="1" class="oe_highlight"/>
+			</header>
+			<group col="4">
+				
+				<field name="name"/>
+				<!--<label string=""/>-->
+				<field name="date"/>
+				<field name="number"/>
+				<field name="version"/>				
+			</group>
+                        <notebook colspan="8">
+                            <page string="Generalidades">
+				<group col="12">
+					<group col="2">
+						<field name="bc_padre_id" invisible="1"/>
+						<field name="pedido_venta_validado" invisible="1"/>
+						<field name="oportunidad_id" on_change="onchange_oportunidad(oportunidad_id)" domain="[('type','=','opportunity'),('bc_id','=',False)]" context="{'form_view_ref': 'crm.crm_case_form_view_oppor'}"/>
+						<field name="user_id"/>
+						<field name="proyecto_id"/>
+						<field name="orden_compra"/>
+						<field name="orden_compra_externa"/>
+						<field name="pedido_venta"/>
+						<field name="deal_fabricantes"/>
+						<field name="fecha_entrega_equipos"/>
+						<field name="fecha_entrega_servicios"/>
+                        
+                        
+                        <field name="garantia"/>
+                        <field name="vigencia_oferta"/>
+                        <field name="condiciones_pago"/>
+                        
+						<newline/>
+						<label string=" "/>
+						<label string=" "/>
+						<group col="2">
+									<center>
+								<h4><label string="Resumen"/></h4><center><Table border="1" CELLSPACING="15" WIDTH="250">
+									<tr>
+										<td>
+											<label string="Ingreso Presupuestado"/>
+										</td>
+										<td>
+											<field name="resumen_ingreso_c"  readonly="1"/>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<label string="Egresos Presupuestados"/>
+										</td>
+										<td>
+											<field name="resumen_egreso_c"  readonly="1"/>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<label string="Utilidad"/>
+										</td>
+										<td>
+											<field name="resumen_utilidad_c"  readonly="1"/>
+										</td>
+									</tr>
+									</Table></center>
+							</center>
+						</group>
+						  
+						<!--<group col="1">-->
+						<!--<h3><label string="Resumen"/><label string=" "/></h3><newline/>
+						<field name="resumen_ingreso"/>
+						<field name="resumen_egreso"/>
+						<field name="resumen_utilidad"/>-->
+						<!--</group>-->
+					</group>
+					<group col="2">	
+						<notebook colspan="2">
+							<page string="Información Cliente">
+								<group col="6">
+									<field name="cliente_id" on_change="onchange_cliente(cliente_id)"/><newline/>
+									<field name="contactos_id" >
+									<tree create="0" delete="0" edit="0">
+										<field name="name"/>
+										<field name="phone"/>
+										<field name="email"/>
+									</tree>
+									</field>
+									<newline/>
+									<field name="telefono_cliente"/><newline/>
+									<field name="direccion_entrega"/><newline/>
+									<field name="email_cliente"/><newline/>
+								</group>
+							</page>
+							<page string="Observaciones">
+								<field name="bc_observaciones"/>
+							</page>
+						</notebook>
+					</group>
+					
+				</group>
+				<notebook colspan="8">
+					<page string="Aprobaciones">
+						<group col="2">
+							<field name="aprobaciones_id"  nolabel="1">
+								<tree string="" editable="bottom">
+								    <field name="name"/>
+								    <field name="users_id" />
+								    <field name="gerente_id"/> 
+								    <field name="director_id"/>
+								    <!--<field name="bc_id"/>-->
+								</tree>
+							</field>
+					
+						</group>
+					</page>
+				</notebook>
+                            </page>
+
+                            <page string="Descripción del Servicio">
+				<group col="4">
+					<field name="solucion" placeholder="Escriba aquí el nombre de solución ofertada" invisible="1"/>
+				</group>
+			    	<group col="2">
+					<field name="cliente_requerimientos"/>
+					<field name="descripcion_solucion"/>
+					<field name="factores_criticos"/>
+					<field name="elementos_fuera"/>
+				</group>
+                            </page>
+
+                            <page string="Costos Operativos">
+				<notebook colspan="8">
+					<page string="Horas de trabajo">
+					    	<group col="8">
+							<field name="horas_id"  nolabel="1">
+								<tree string="" editable="bottom">
+									<field name="horas_trabajo" on_change="onchange_horas_trabajo(horas_trabajo)"/>
+							    	<field name="cadencia" on_change="onchange_cadencia(horas_trabajo,cadencia)"/>
+							    	<field name="rol"/> 
+							    	<field name="pais" widget="selection"/>
+							    	<field name="numero_personas"/>
+							    	<field name="porc_dedicacion"/>
+									<field name="cantidad_fte"/>
+									<field name="cantidad_fte_digits" invisible="1"/>
+									<field name="puesto_spc" on_change="onchange_puesto_spc(puesto_spc,pais,cantidad_fte_digits,cadencia,numero_personas)" widget="selection"/>
+									<field name="area_id" widget="selection"/>
+									<field name="modo_contratacion" widget="selection"/>
+									<field name="ubicacion" widget="selection"/>
+								    <field name="salario_fte" invisible="1"/>
+									<field name="total" invisible="1"/>
+									<field name="observaciones"/>
+									<field name="salario"/>
+									<field name="cargas_sociales"/>
+								</tree>
+							</field>
+						</group>
+					
+					
+						<group col="2">
+							<newline/>
+							<field name="horas_totales_id">
+								<tree string="" editable="bottom">
+									<field name="area_id" widget="selection"/>
+									<field name="total_horas"/>
+									<field name="total_fte"/>
+									<field name="total_salario"/>
+								    	<field name="cargas_sociales"/>
+									<field name="total_costo_horas"/>
+									<field name="total_venta_horas"/>
+								</tree>
+							</field>
+							<!--<label string=""/>-->
+						</group>
+						<group col="9">
+							<label string=" "/>
+							<label string=" "/>
+							<!--<button name="boton_actualizar_horas_trabajo" string="Actualizar" class="oe_highlight" type="object" context="{'implementacion_ip_por': implementacion_ip_por,'mantenimientos_ip_por': mantenimientos_ip_por,'infra_ip_por': infra_ip_por,'noc_ip_por': noc_ip_por}"/>-->
+						</group>
+					</page> 
+					<!-- ***-->
+					<page string="Viáticos">
+					    	<group col="8">
+							<field name="viaticos_id"  nolabel="1">
+								<tree string="" editable="bottom">
+									<field name="bc_id" invisible="1"/>
+									<field name="pais"/>
+									<field name="analytic_id" />
+									<field name="sub_categ_id" />
+							    	<field name="account_id" />
+								<!--<field name="cantidad" on_change="onchange_cantidad_costo(cantidad,costo_individual,sub_categ_id,parent.implementacion_ip_por,parent.mantenimientos_ip_por,parent.infra_ip_por,parent.noc_ip_por,ingreso_propuesto_superior_id)"/>-->
+								<field name="cantidad" on_change="onchange_cantidad_costo(cantidad,costo_individual,sub_categ_id,parent.ingreso_propuesto_superior_id,bc_id)"/>
+								<!--<field name="costo_individual" on_change="onchange_cantidad_costo(cantidad,costo_individual,sub_categoria_id,parent.implementacion_ip_por,parent.mantenimientos_ip_por,parent.infra_ip_por,parent.noc_ip_por)"/>-->
+								<field name="costo_individual" on_change="onchange_cantidad_costo(cantidad,costo_individual,sub_categ_id,parent.ingreso_propuesto_superior_id,bc_id)"/>
+							    	<field name="total_costo"/>
+									<field name="total_venta"/>
+								</tree>
+							</field>
+						</group>
+						<group col="2">
+						<newline/>
+							<field name="totales_viaticos_id">
+								<tree string="" editable="bottom">
+									<field name="sub_categoria_id"/>
+									<field name="total_costo_viaticos"/>
+									<field name="total_venta_viaticos"/>
+								</tree>
+							</field>
+							
+							<!--<label string=""/>-->	
+						</group> 
+						<group col="9">
+								<label string=" "/>
+								<label string=" "/>
+								<!--<button name="boton_actualizar_viaticos" string="Actualizar" class="oe_highlight" type="object" context="{'implementacion_ip_por': implementacion_ip_por,'mantenimientos_ip_por': mantenimientos_ip_por,'infra_ip_por': infra_ip_por,'noc_ip_por': noc_ip_por}"/>-->							
+							</group>
+					</page> 
+					<!-- ***-->
+					<page string="Materiales Adicionales">
+					    	<group col="8">
+							<field name="adicionales_id"  nolabel="1">
+								<tree string="" editable="bottom">
+									<field name="descripcion"/>
+									<field name="area_id" widget="selection"/> 
+							    	<field name="cantidad" on_change="onchange_cantidad_costo(cantidad, costo_unitario, area_id, parent.ingreso_propuesto_superior_id)"/>
+							    	<field name="costo_unitario" on_change="onchange_cantidad_costo(cantidad, costo_unitario, area_id, parent.ingreso_propuesto_superior_id)"/>
+							    	<field name="costo_final"/>
+							    	<field name="venta_final"/>
+								</tree>
+							</field>
+						</group>
+						<group col="2">
+							<newline/>
+							<field name="totales_adicionales_id">
+								<tree string="" editable="bottom">
+									<field name="area_id" widget="selection"/> 
+									<field name="total_costo_materiales"/>
+									<field name="total_venta_materiales"/>
+								</tree>
+							</field>
+							
+							<!--<label string=""/>-->	
+						</group> 
+						<group col="9">
+								<label string=" "/>
+								<label string=" "/>
+								<!--<button name="boton_actualizar_adicionales" string="Actualizar" class="oe_highlight" type="object" context="{'implementacion_ip_por': implementacion_ip_por,'mantenimientos_ip_por': mantenimientos_ip_por,'infra_ip_por': infra_ip_por,'noc_ip_por': noc_ip_por}"/>-->							
+							</group>
+					</page> 
+					<page string="Ingreso propuesto">
+					<group col="9">
+							<field name="ingreso_propuesto_superior_id" >
+								<tree string="" editable="bottom" delete="0" create="0">
+									<field name="area_id" widget="selection"/>
+									<field name="monto_venta"/>
+									<field name="porc_venta" on_change="onchange_porc_venta(parent.horas_totales_id,parent.totales_viaticos_id,parent.totales_adicionales_id,parent.costo_operacion_id,parent.margen_contribucion_id,parent.viaticos_id,parent.adicionales_id,area_id,monto_venta,porc_venta)"/>
+								</tree>
+							</field>
+						</group>
+					
+					
+					    <group col="9">
+							<field name="ingreso_propuesto_id"  nolabel="1">
+								<tree string="" editable="bottom">
+									<field name="cdo_id"/>
+									<field name="implementacion"/>
+									<field name="implementacion_por" invisible="1"/>
+									<field name="mantenimientos"/>
+									<field name="mantenimientos_por" invisible="1"/>
+									<field name="infraestructura"/>
+									<field name="infraestructura_por" invisible="1"/>
+									<field name="noc"/>
+									<field name="noc_por" invisible="1"/>
+								</tree>
+							</field>
+						</group>
+					<group col="80">
+						<group col="9">
+							<field name="costo_operacion_id" >
+								<tree string="" editable="bottom">
+									<field name="area_id" widget="selection"/>
+									<field name="monto_costo"/>
+								</tree>
+							</field>
+						</group>
+						<!--<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<field name="implementacion_costo" nolabel="1"/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<field name="mantenimientos_costo" nolabel="1"/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<field name="infra_costo" nolabel="1"/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<field name="noc_costo" nolabel="1"/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>
+						<label string=" "/>-->
+					</group>
+					
+					<group col="80">
+						<group col="9">
+							<field name="margen_contribucion_id" >
+								<tree string="" editable="bottom" delete="0" create="0">
+									<field name="area_id" widget="selection"/>
+									<field name="monto_contribucion"/>
+									<field name="porc_contribucion"/>
+								</tree>
+							</field>
+						</group>
+					</group>
+					
+					<group col="9">
+						<label string=" "/>
+						<label string=" "/>
+					</group>
+					</page> 
+					
+					<page string="Notas Adicionales">
+					    	<field name="bc_notas_adicionales" placeholder="Agregue aquí sus notas adicionales."/>
+					</page> 
+				</notebook>
+                            </page>
+                            <page string="BOM Equipo">
+                                <button name="crear_productos" string="Crear Productos" type="object" icon="terp-gtk-jump-to-ltr" class="oe_inline"/>
+                                <button name="limpiar_bom" string="Limpiar BOM" type="object" icon="STOCK_DIALOG_ERROR" class="oe_inline"/>
+                                <field name="archivo"  on_change="onchange_archivo(archivo)"/>
+                     	    	<group col="8">
+
+					<field name="bom_equipo_id"  nolabel="1" context="{'name':active_id,'default_stadito':state}" options="{'limit': 10, 'create': false}">
+						<tree string="" editable="bottom" colors="red:cargar == False" >
+                            <field name="cargar" readonly="0" on_change="create_products(cargar,descripcion_producto,codigo_producto,bom_tipo,categoria_id)"/>
+							<field name="codigo_producto" attrs="{'readonly':[('stadito', '!=', 'draft')]}"/> <!--on_change="change_cod(parent.id)" -->
+                            <field name="otro_proveedor_id" invisible="1"/>
+                            <field name="descripcion_producto" attrs="{'readonly':[('stadito', '!=', 'draft')]}"/>
+							<field name="cantidad" sum="cantidad" on_change="calculo(preciol_unitario,descuento,precio_cu,cantidad,porc_utilidad)" attrs="{'readonly':[('stadito', '=', 'done')]}"/>
+                            <field name="product_id" invisible="0" on_change="product_id_change(product_id)"/>
+                            <field name="preciol_unitario" on_change="calculo(preciol_unitario,descuento,precio_cu,cantidad,porc_utilidad)" attrs="{'readonly':[('stadito', '!=', 'draft')]}"/>
+							<field name="proveedor_id" domain="[('supplier','=',True)]" attrs="{'readonly':[('stadito', '=', 'done')]}"/>
+							<field name="stadito" invisible="1"/>
+							<field name="descuento" on_change="calculo(preciol_unitario,descuento,precio_cu,cantidad,porc_utilidad)"
+ attrs="{'readonly':[('stadito', '=', 'done')]}"/>
+							<field name="precio_cu" readonly="1"/>
+                            <field name="total_costo" readonly="1" sum="total_costo"/>
+                            <field name="porc_utilidad" on_change="calculo(preciol_unitario,descuento,precio_cu,cantidad,porc_utilidad)" attrs="{'readonly':[('stadito', '=', 'done')]}"/>
+                            <field name="precio_unitario" readonly="1"/>
+                            <field name="precio_total" sum="precio_total" readonly="1"/>
+                            
+                            
+							<field name="tax_id" widget="many2many_tags" attrs="{'readonly':[('stadito', '=', 'done')]}" create="0"/>
+                            
+                            
+							<!--<field name="imp_ventas_unitario" sum="imp_ventas_unitario" />
+                            <field name="imp_ventas_total" sum="imp_ventas_total" />-->
+                            <field name="precio_tu" readonly="1" />
+                            <field name="precio_total_ivi" sum="precio_total_ivi" readonly="1"/>
+                            <field name="bom_tipo" attrs="{'readonly':[('stadito', '!=', 'draft')]}"/>
+                            <field name="categoria_id" attrs="{'readonly':[('stadito', '!=', 'draft')]}"/>
+                            <field name="observaciones" attrs="{'readonly':[('stadito', '=', 'done')]}"/>
+						</tree>
+					</field>
+				</group> 
+                            </page>
+                            <page string="Margen de Operación" invisible="0">
+				<newline/>
+				<center><h2><label string="Estado de Resultados"/></h2></center>
+				<newline/>
+				<h4><label string="Ingreso propuesto"/></h4><center><Table border="1" CELLSPACING="15" WIDTH="1000">
+					<tr>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  Implementación  "/></center>
+						</th>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  Mantenimientos  "/></center>
+						</th>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  NOC  "/></center>
+						</th>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  Infraestructura  "/></center>
+						</th>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  Equipos  "/></center>
+						</th>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  TOTAL  "/></center>
+						</th>
+					</tr>
+					<tr>
+						<td>
+							<field name="ingreso_implementacion" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="porc_ingreso_implementacion" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="ingreso_mantenimientos" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="porc_ingreso_mantenimientos" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="ingreso_noc" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="porc_ingreso_noc" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="ingreso_infraestructura" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="porc_ingreso_infraestructura" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="ingreso_equipos" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="porc_ingreso_equipos" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="ingreso_total" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="porc_ingreso_total" nolabel="1" readonly="1"/>
+						</td>
+					</tr>
+				</Table></center>
+
+				<newline/>
+				<!--<h4><label string="CDO"/></h4>
+				<Table border="0" CELLSPACING="15" WIDTH="1400">
+					<tr>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  Implementación  "/></center>
+						</th>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  Mantenimientos  "/></center>
+						</th>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  NOC  "/></center>
+						</th>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  Infraestructura  "/></center>
+						</th>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  Equipos  "/></center>
+						</th>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  TOTAL  "/></center>
+						</th>
+					</tr>
+					</Table>-->
+				<group col="2">
+				  <field name="bc_margen_operacion_id"  nolabel="1" readonly="1">
+					  <tree string="" editable="bottom">
+						  <field name="name"/>
+						  <field name="monto_implementacion"/>
+						  <!--<field name="porc_implementacion" />-->
+						  <field name="monto_mantenimientos"/>
+						  <!--<field name="porc_mantenimientos"/>--> 
+						  <field name="monto_noc"/>
+						  <!--<field name="porc_noc"/>--> 
+						  <field name="monto_infraestructura"/>
+						  <!--<field name="porc_infraestructura"/>--> 
+						  <field name="monto_equipos" />
+						  <!--<field name="porc_equipos"/> --> 
+						  <field name="monto_total"/>
+						  <!--<field name="porc_total"/>--> 
+					  </tree>
+				  </field>
+				</group>
+				<newline/>
+			    	
+				  <h4><label string="Costo de Operación"/></h4><center><Table border="1" CELLSPACING="15" WIDTH="1000">
+					<tr>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  Implementación  "/></center>
+						</th>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  Mantenimientos  "/></center>
+						</th>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  NOC  "/></center>
+						</th>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  Infraestructura  "/></center>
+						</th>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  Equipos  "/></center>
+						</th>
+						<th  COLSPAN="2" BGCOLOR="#6D8FFF">
+							<center><label string="  TOTAL  "/></center>
+						</th>
+					</tr>
+					<tr>
+						<td>
+							<field name="costo_implementacion" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="porc_costo_implementacion" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="costo_mantenimientos" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="porc_costo_mantenimientos" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="costo_noc" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="porc_costo_noc" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="costo_infraestructura" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="porc_costo_infraestructura" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="costo_equipos" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="porc_costo_equipos" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="costo_total" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="porc_costo_total" nolabel="1" readonly="1"/>
+						</td>
+					</tr>
+				</Table></center>
+
+				<newline/>
+				
+				<h4><label string="Número de FTE"/></h4><center><Table border="1" CELLSPACING="15" WIDTH="500">
+					<tr>
+						<th  COLSPAN="1" BGCOLOR="#6D8FFF">
+							<center><label string="  Implementación  "/></center>
+						</th>
+						<th  COLSPAN="1" BGCOLOR="#6D8FFF">
+							<center><label string="  Mantenimientos  "/></center>
+						</th>
+						<th  COLSPAN="1" BGCOLOR="#6D8FFF">
+							<center><label string="  NOC  "/></center>
+						</th>
+						<th  COLSPAN="1" BGCOLOR="#6D8FFF">
+							<center><label string="  Infraestructura  "/></center>
+						</th>
+						<th  COLSPAN="1" BGCOLOR="#6D8FFF">
+							<center><label string="  Equipos  "/></center>
+						</th>
+						<th  COLSPAN="1" BGCOLOR="#6D8FFF">
+							<center><label string="  TOTAL  "/></center>
+						</th>
+					</tr>
+					<tr>
+						<td>
+							<field name="fte_implementacion" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="fte_mantenimientos" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="fte_noc" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="fte_infraestructura" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="fte_equipos" nolabel="1" readonly="1"/>
+						</td>
+						<td>
+							<field name="fte_total" nolabel="1" readonly="1"/>
+						</td>
+					</tr>
+					</Table></center>
+
+				<newline/>
+				<group col="2">
+				  <field name="bc_montos_indicadores_id"  nolabel="1" readonly="1">
+					  <tree string="" editable="bottom">
+						  <field name="name"/>
+						  <field name="indicador_implementacion"/>
+						  <field name="indicador_mantenimientos"/>
+						  <field name="indicador_noc"/>
+						  <field name="indicador_infraestructura"/>
+						  <field name="indicador_equipos" />
+						  <field name="indicador_total"/>
+					  </tree>
+				  </field>
+				</group>
+				<group col="2">
+					<center>
+						<h4><label string="Resumen"/></h4><center><Table border="1" CELLSPACING="15" WIDTH="250">
+							<tr>
+								<td>
+									<label string="Ingreso Presupuestado"/>
+								</td>
+								<td>
+									<field name="resumen_ingreso"  readonly="1"/>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<label string="Egresos Presupuestados"/>
+								</td>
+								<td>
+									<field name="resumen_egreso"  readonly="1"/>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<label string="Utilidad"/>
+								</td>
+								<td>
+									<field name="resumen_utilidad"  readonly="1"/>
+								</td>
+							</tr>
+							</Table></center>
+					</center>
+				</group>
+                            </page>
+
+                        </notebook>   
+			<!--<div class="oe_chatter">
+		            <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+		            <field name="message_ids" widget="mail_thread"/>
+		        </div>-->                    
+            </form>
+        </field>
+    </record>
+
+        <record  id="business_case_action" model="ir.actions.act_window">
+            <field name="name">Business Case</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">business.case</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_business_case_tree"/>
+        </record>
+
+
+        <menuitem id="menu_business_case" name="Business Case"
+                  action="business_case_action" sequence="10"/>
+                  
+        <record  id="accion_areas_especialidad" model="ir.actions.act_window">
+            <field name="name">areas de especialidad</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">bc.areas.especialidad</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+        <record  id="accion_cf" model="ir.actions.act_window">
+            <field name="name">cf</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">bc.cf</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+        <record  id="accion_cargas_sociales" model="ir.actions.act_window">
+            <field name="name">Cargas sociales</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">bc.cargas.sociales</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+        <record  id="accion_salarios" model="ir.actions.act_window">
+            <field name="name">Perfiles Tecnicos</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">bc.salarios</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+         <record  id="accion_configuracion" model="ir.actions.act_window">
+            <field name="name">Configuraciones Generales</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">bc.configuracion</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">inline</field>
+        </record>
+        
+		<record model="ir.ui.view" id="bc_salarios_view_form">
+	        <field name="name">bc.salarios_view</field>
+	        <field name="model">bc.salarios</field>
+	        <field name="type">form</field>
+	        <field name="arch" type="xml">
+	            <form string="Salarios" version="7.0">
+	            	<group>
+	            		<field name="name"/>
+	            		<field name="costa_rica"/>
+	            		<field name="guatemala"/>
+	            		<field name="el_salvador"/>
+	            		<field name="nicaragua"/>
+	            		<field name="honduras"/>
+	            	</group>
+	            </form>
+	        </field>
+	    </record>
+	    
+	    <record model="ir.ui.view" id="bc_cf_view_form">
+	        <field name="name">bc.cf_view</field>
+	        <field name="model">bc.cf</field>
+	        <field name="type">form</field>
+	        <field name="arch" type="xml">
+	            <form string="Salarios" version="7.0">
+	            	<group>
+	            		<field name="name"/>
+	            	</group>
+	            </form>
+	        </field>
+	    </record>
+	    
+	    <record model="ir.ui.view" id="bc_salarios_view_tree">
+	        <field name="name">bc.salarios_tree_view</field>
+	        <field name="model">bc.salarios</field>
+	        <field name="type">tree</field>
+	        <field name="arch" type="xml">
+	            <tree string="Salarios">
+            		<field name="name"/>
+            		<field name="costa_rica"/>
+            		<field name="guatemala"/>
+            		<field name="el_salvador"/>
+            		<field name="nicaragua"/>
+            		<field name="honduras"/>
+	            </tree>
+	        </field>
+	    </record>
+	  
+        <record  id="accion_bc_paises" model="ir.actions.act_window">
+            <field name="name">Paises</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">bc.paises</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+        <record  id="accion_bc_bc_aprobaciones" model="ir.actions.act_window">
+            <field name="name">Aprobaciones Departamento</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">bc.aprobaciones.departamento</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+        <record  id="accion_bc_cdo" model="ir.actions.act_window">
+            <field name="name">CDO</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">bc.cdo</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+          <record model="ir.ui.view" id="bc_cdo_margen">
+	        <field name="name">bc.cdo.margen</field>
+	        <field name="model">bc.cdo.margen</field>
+	        <field name="type">tree</field>
+	        <field name="arch" type="xml">
+	            <tree string="Salarios">
+            		<field name="name"/>
+	            </tree>
+	        </field>
+	    </record>
+	    
+	    <record model="ir.ui.view" id="view_bc_configuracion">
+	        <field name="name">bc.configuracion.view</field>
+	        <field name="model">bc.configuracion</field>
+	        <field name="type">form</field>
+	        <field name="arch" type="xml">
+	            <form string="Configuracion" version="7.0" class="oe_form_configuration">
+	            	<header>
+	            			<button name="apply_conf" type="object" string="Aplicar" context="{'fte':fte}" class="oe_highlight"/>
+	            	</header>
+            		<group>
+						<field name="fte" class="oe_inline"/>
+					</group>
+	            </form>
+	        </field>
+	    </record>
+	    
+	    <record model="ir.ui.view" id="view_product_bc_form_inherit">
+			<field name="name">product.product.bc.form.inherit</field>
+			<field name="model">product.product</field>
+			<field name="type">form</field>
+			<field name="inherit_id" ref="product.product_normal_form_view"/>
+			<field name="arch" type="xml">
+				<field name="type" position="after">
+					<field name="type_bom"/>
+				</field>
+			</field>
+		</record>
+        
+         <record  id="accion_bc_cdo_margen" model="ir.actions.act_window">
+            <field name="name">CDO_Margen</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">bc.cdo.margen</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+		<record  id="accion_indicadores" model="ir.actions.act_window">
+            <field name="name">Indicadores</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">bc.indicadores</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+        <record  id="accion_bom_categorias" model="ir.actions.act_window">
+            <field name="name">Categorias</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">bc.bom.categorias</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+        <record  id="accion_modo_contratacion" model="ir.actions.act_window">
+            <field name="name">Modo de contratación</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">bc.modo.contratacion</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        
+        <record  id="accion_ubicacion_fisica" model="ir.actions.act_window">
+            <field name="name">Ubicación física</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">bc.ubicacion.fisica</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <record  id="accion_subcategoria_viaticos" model="ir.actions.act_window">
+            <field name="name">Subcategoria Viaticos</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">bc.viaticos.categ</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <!-- -->
+	<record  id="accion_areas_productos" model="ir.actions.act_window">
+            <field name="name">Producto de Área</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">bc.areas.productos</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+         <!--nuevo para WIZARD DE CORREOS, SUBIR A RAMA--> 
+	    <record id="view_enviar_mensajes" model="ir.ui.view">
+		<field name="name">enviar.mensajes</field>
+		<field name="model">enviar.mensajes</field>
+		<field name="arch" type="xml">
+		<form string="Report Options" version="7.0">
+		    <label string="Director "/>
+		       <group>
+                        <!-- visible wizard -->
+                        <label for="partner_ids" string="Recipients"/>
+                        <div>
+                            <field name="partner_ids" widget="many2many_tags_email" placeholder="Add contacts to notify..."
+                                   context="{'force_email':True, 'show_email':True}"/>
+                        </div>
+                        <field name="subject" placeholder="Subject..."/>
+                    </group>
+                    <field name="body"/>
+                    <field name="attachment_ids" widget="many2many_binary"/>
+                    <footer>
+                        <button string="Send" name="send_mail_businesscase" type="object" class="oe_highlight"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel" />
+                    </footer>
+
+		</form>
+		
+		</field>
+	    </record> 
+
+        <menuitem id="menu_conf_bc" name="Business Case" sequence="0" parent="base.menu_base_config"/>
+        <menuitem id="menu_bc_configuracion" name="Configuraciones Generales" action="accion_configuracion" sequence="0" parent="menu_conf_bc"/>
+        <!--<menuitem id="menu_areas_especialidad" name="Areas de especialidad" action="accion_areas_especialidad" sequence="1" parent="menu_conf_bc"/>-->
+        <menuitem id="menu_cargas_sociales" name="Cargas sociales" action="accion_cargas_sociales" sequence="3" parent="menu_conf_bc"/>
+        <menuitem id="menu_salarios" name="Salarios por perfil y por país" action="accion_salarios" sequence="2" parent="menu_conf_bc"/>
+        <menuitem id="menu_paises" name="Paises" action="accion_bc_paises" sequence="4" parent="menu_conf_bc"/>
+        <menuitem id="menu_aprobaciones" name="Aprobaciones departamento" action="accion_bc_bc_aprobaciones" sequence="5" parent="menu_conf_bc"/>
+        <menuitem id="menu_cdo" name="CDO" action="accion_bc_cdo" sequence="6" parent="menu_conf_bc"/>
+        <menuitem id="menu_cdo_margen" name="CDO Margen" action="accion_bc_cdo_margen" sequence="7" parent="menu_conf_bc"/>
+    	<menuitem id="menu_indicadores" name="Indicadores" action="accion_indicadores" sequence="8" parent="menu_conf_bc"/>
+    	<menuitem id="menu_bom_categorias" name="Categorías de Bom" action="accion_bom_categorias" sequence="9" parent="menu_conf_bc"/>
+    	<menuitem id="menu_modo_contratacion" name="Modo de Contratación" action="accion_modo_contratacion" sequence="10" parent="menu_conf_bc"/>
+    	<menuitem id="menu_ubicacion fisica" name="Ubicaciones físicas" action="accion_ubicacion_fisica" sequence="11" parent="menu_conf_bc"/>
+    	<menuitem id="menu_subcategoria_viaticos" name="Subcategorias Viáticos" action="accion_subcategoria_viaticos" sequence="12" parent="menu_conf_bc"/>
+    	<menuitem id="menu_areas_productos" name="Productos de área" action="accion_areas_productos" sequence="13" parent="menu_conf_bc"/>
+    
+    </data>
+</openerp>
